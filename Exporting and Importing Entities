@@ -1,0 +1,51 @@
+{
+  "operations": [
+    {
+      "name": "projects/project-id/operations/ASAyMDAwOTEzBxp0bHVhZmVkBxJsYXJ0bmVjc3Utc2Jvai1uaW1kYRQKKhI",
+      "metadata": {
+        "@type": "type.googleapis.com/google.datastore.admin.v1.ExportEntitiesMetadata",
+        "common": {
+          "startTime": "2017-12-05T23:01:39.583780Z",
+          "endTime": "2017-12-05T23:54:58.474750Z",
+          "operationType": "EXPORT_ENTITIES"
+        },
+        "progressEntities": {
+          "workCompleted": "21933027",
+          "workEstimated": "21898182"
+        },
+        "progressBytes": {
+          "workCompleted": "12421451292",
+          "workEstimated": "9759724245"
+        },
+        "entityFilter": {
+          "namespaceIds": [
+            ""
+          ]
+        },
+        "outputUrlPrefix": "gs://bucket-name"
+      },
+      "done": true,
+      "response": {
+        "@type": "type.googleapis.com/google.datastore.admin.v1.ExportEntitiesResponse",
+        "outputUrl": "gs://bucket-name/2017-05-25T23:54:39_76544/2017-05-25T23:54:39_76544.overall_export_metadata"
+      }
+    }
+  ]
+}
+{
+  "operations": [
+    {
+      "name": "projects/project-id/operations/ASAyMDAwOTEzBxp0bHVhZmVkBxJsYXJ0bmVjc3Utc2Jvai1uaW1kYRQKKhI",
+      "metadata": {
+        "@type": "type.googleapis.com/google.datastore.admin.v1.ExportEntitiesMetadata",
+        ...
+        "progressEntities": {
+          "workCompleted": "1",
+          "workEstimated": "3"
+        },
+        "progressBytes": {
+          "workCompleted": "85",
+          "workEstimated": "257"
+        },
+        ...
+        
