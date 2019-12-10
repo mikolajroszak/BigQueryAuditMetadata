@@ -1,0 +1,63 @@
+protoPayload.methodName is set to one of the following values:
+
+google.cloud.bigquery.v2.TableService.InsertTable
+google.cloud.bigquery.v2.TableService.UpdateTable
+google.cloud.bigquery.v2.TableService.PatchTable
+google.cloud.bigquery.v2.TableService.DeleteTable
+google.cloud.bigquery.v2.DatasetService.InsertDataset
+google.cloud.bigquery.v2.DatasetService.UpdateDataset
+google.cloud.bigquery.v2.DatasetService.PatchDataset
+google.cloud.bigquery.v2.DatasetService.DeleteDataset
+google.cloud.bigquery.v2.TableDataService.List
+google.cloud.bigquery.v2.JobService.InsertJob
+google.cloud.bigquery.v2.JobService.Query
+google.cloud.bigquery.v2.JobService.GetQueryResults
+InternalTableExpired
+#standardSQL
+  WITH data as
+  (
+    SELECT
+      protopayload_auditlog.authenticationInfo.principalEmail as principalEmail,
+      protopayload_auditlog.servicedata_v1_bigquery.jobCompletedEvent AS jobCompletedEvent
+    FROM
+      `MYPROJECTID.MYDATASETID.cloudaudit_googleapis_com_data_access_YYYYMMDD`
+  )
+  SELECT
+    principalEmail,
+    FORMAT('%9.2f',5.0 * (SUM(jobCompletedEvent.job.jobStatistics.totalBilledBytes)/POWER(2, 40))) AS Estimated_USD_Cost
+  FROM
+    data
+  WHERE
+    jobCompletedEvent.eventName = 'query_job_completed'
+  GROUP BY principalEmail
+  ORDER BY Estimated_USD_Cost DESC
+  #standardSQL
+  SELECT
+    TIMESTAMP_TRUNC(protopayload_auditlog.servicedata_v1_bigquery.jobCompletedEvent.job.jobStatistics.endTime, HOUR) AS time_window,
+    FORMAT('%9.2f',5.0 * (SUM(protopayload_auditlog.servicedata_v1_bigquery.jobCompletedEvent.job.jobStatistics.totalBilledBytes)/POWER(2, 40))) AS Estimated_USD_Cost
+  FROM
+    `MYPROJECTID.MYDATASETID.cloudaudit_googleapis_com_data_access_YYYYMMDD`
+  WHERE
+    protopayload_auditlog.servicedata_v1_bigquery.jobCompletedEvent.eventName = 'query_job_completed'
+  GROUP BY time_window
+      ORDER BY time_window DESC
+       #standardSQL
+  SELECT
+    protopayload_auditlog.resourceName AS resourceName,
+    receiveTimestamp as logTime
+  FROM `MYPROJECTID.MYDATASETID.cloudaudit_googleapis_com_system_event_201901*`
+  WHERE
+    protopayload_auditlog.methodName = 'InternalTableExpired'
+  ORDER BY resourceName
+   #standardSQL
+  SELECT
+    REGEXP_EXTRACT(protopayload_auditlog.resourceName, '^projects/[^/]+/datasets/([^/]+)/tables') AS datasetRef,
+    COUNT(DISTINCT REGEXP_EXTRACT(protopayload_auditlog.resourceName, '^projects/[^/]+/datasets/[^/]+/tables/(.*)$')) AS active_tables,
+    COUNTIF(JSON_EXTRACT(protopayload_auditlog.metadataJson, "$.tableDataRead") IS NOT NULL) AS dataReadEvents,
+    COUNTIF(JSON_EXTRACT(protopayload_auditlog.metadataJson, "$.tableDataChange") IS NOT NULL) AS dataChangeEvents
+  FROM `MYPROJECTID.MYDATASETID.cloudaudit_googleapis_com_data_access_2019*`
+  WHERE
+    JSON_EXTRACT(protopayload_auditlog.metadataJson, "$.tableDataRead") IS NOT NULL
+    OR JSON_EXTRACT(protopayload_auditlog.metadataJson, "$.tableDataChange") IS NOT NULL
+  GROUP BY datasetRef
+  ORDER BY datasetRef
